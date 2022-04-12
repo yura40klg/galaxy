@@ -1,0 +1,19 @@
+---
+# tasks file for build
+  - name: install packages
+    apt: name={{item}} state=present
+    with_items:
+     - git
+     - maven
+     - rsync
+
+  - name: Git clone
+    git: repo="https://github.com/boxfuse/boxfuse-sample-java-war-hello.git" dest=/tmp/boxfuse clone=yes update=yes
+
+  - name: building Boxfuse project
+    shell: cd /tmp/boxfuse && mvn package
+
+  - name: Ensure *.war artifact is present
+    synchronize: mode=pull src=/tmp/boxfuse/target/*.war dest=/tmp/war/
+     
+     

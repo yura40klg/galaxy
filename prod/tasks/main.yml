@@ -1,0 +1,52 @@
+---
+# tasks file for prod
+ - name: install packages
+   apt: name={{item}} state=present
+   with_items:
+    - git
+    - openjdk-11-jdk
+    - rsync
+
+ 
+ - name: add group for tomcat
+   group: name=tomcat
+
+ - name: add user tomcat
+   user: name=tomcat group=tomcat
+ 
+ - name: creat dir for tomcate
+   file: path={{path}}/tomcat state=directory mode=0755
+    
+ - name: download tomcat server packages and unarchive
+   get_url:
+     url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.62/bin/apache-tomcat-9.0.62.tar.gz 
+     dest: /usr/local/tomcat   
+
+ - name: estract archive
+   unarchive: 
+    src: /usr/local/tomcat/apache-tomcat-9.0.62.tar.gz 
+    dest: /usr/local/tomcat 
+    remote_src: yes 
+    extra_opts: [--strip-components=1]
+
+ - name: Change owner
+   file: path={{ path }}/tomcat owner=tomcat group=tomcat mode="u+rwx,g+rx,o=rx" recurse=yes state=directory
+
+ - name: Ensure *.war artifact is present
+   copy:
+     src: /tmp/war/hello-1.0.war
+     dest: /usr/local/tomcat/webapps/
+ #    mode: 0755 
+
+ - name: copy system tomcat file
+   copy: 
+    src: tomcat.service 
+    dest: /etc/systemd/system/
+    mode: 0755
+
+ - name: start tomcat
+   systemd: 
+    name: tomcat
+    state: started
+    enabled: true
+    daemon_reload: true

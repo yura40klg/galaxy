@@ -1,0 +1,15 @@
+---
+ - name: prepare build node
+   hosts: db
+   become: yes
+
+   roles:
+    - build
+
+ - name: prepare prod node
+   hosts: web
+   become: yes
+
+   roles:
+    - prod
+
